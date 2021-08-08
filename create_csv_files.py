@@ -15,12 +15,13 @@ def create_csv_files(state):
         for i in range(NUMBER_OF_INITIAL_FILES):
             filename = str(datetime.now().date()) + '-' + str(i + 1)
             write_csv_file(filename)
+        print('Initial CSV files created successfully')
 
     else:
         for i in range(NUMBER_OF_NEW_FILES):
             filename = str(datetime.now().date()) + '-' + str(NUMBER_OF_INITIAL_FILES + i + 1)
             write_csv_file(filename)
-    print('CSV files created successfully')
+        print('New CSV files created successfully')
 
 
 def write_csv_file(filename):
