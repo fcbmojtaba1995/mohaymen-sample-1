@@ -5,7 +5,7 @@ from utils import create_files_metadata
 from constants import NUMBER_OF_INITIAL_FILES, NUMBER_OF_NEW_FILES
 
 
-def move_files_into_redis():
+def save_files_into_redis():
     redis = RedisClient()
     files_metadata = create_files_metadata()
     if len(files_metadata) > 0:
@@ -14,12 +14,12 @@ def move_files_into_redis():
 
 def start():
     create_csv_files(NUMBER_OF_INITIAL_FILES)  # create initial csv files
-    move_files_into_redis()
+    save_files_into_redis()
 
     time.sleep(10)
 
     create_csv_files(NUMBER_OF_NEW_FILES)  # create new csv files
-    move_files_into_redis()
+    save_files_into_redis()
 
 
 if __name__ == '__main__':
