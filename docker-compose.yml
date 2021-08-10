@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  redis:
+    container_name: redis
+    image: redis:6.2.5
+    ports:
+      - "6379:6379"
+    restart: always
+    volumes:
+      - redis_data:/data
+    networks:
+      - main
+
+  app:
+    container_name: app
+    build: .
+    volumes:
+      - .:/src/
+    networks:
+      - main
+    depends_on:
+      - redis
+      
+networks:
+  main:
+volumes:
+  redis_data:
