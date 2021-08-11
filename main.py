@@ -9,7 +9,14 @@ def save_files_into_redis():
     redis = RedisClient()
     files_metadata = create_files_metadata()
     if len(files_metadata) > 0:
-        redis.create_redis_pipeline('files', files_metadata)
+        redis.set_hash_data('files', files_metadata)
+
+
+def update_files_metadata():
+    redis = RedisClient()
+    files_metadata = create_files_metadata()
+    if len(files_metadata) > 0:
+        redis.update_hash_value('files', files_metadata)
 
 
 def start():
@@ -20,6 +27,9 @@ def start():
 
     create_csv_files(NUMBER_OF_NEW_FILES)  # create new csv files
     save_files_into_redis()
+
+    time.sleep(60)
+    update_files_metadata()
 
 
 if __name__ == '__main__':
