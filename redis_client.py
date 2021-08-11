@@ -18,11 +18,14 @@ class Singleton(type):
 
 class RedisClient(metaclass=Singleton):
     def __init__(self):
-        self.redis_connection = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, password=REDIS_PASSWORD)
+        self.redis_connection = redis.Redis(
+            host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB,
+            password=REDIS_PASSWORD, decode_responses=True
+        )
 
-    def create_redis_pipeline(self, hash_name, files):
+    def set_hash_data(self, hash_name, files):
         """
-        create redis pipeline and set data in redis hash type function.
+         set data in redis hash type with redis pipeline function.
 
         :param hash_name: hash name
         :param files: files(values)
@@ -35,17 +38,17 @@ class RedisClient(metaclass=Singleton):
             pipe.execute()
             pipe.bgsave()
 
-    def get_all_values(self, hash_name):
+    def get_all_hash_values(self, hash_name):
         """
         get all values function.
 
         :param hash_name: hash name
-        :return: hash values
+        :return: all hash values
         """
 
         return self.redis_connection.hvals(str(hash_name))
 
-    def get_number_of_elements(self, hash_name):
+    def get_number_of_hash_elements(self, hash_name):
         """
         get number of elements function.
 
@@ -54,3 +57,33 @@ class RedisClient(metaclass=Singleton):
         """
 
         return self.redis_connection.hlen(str(hash_name))
+
+    def update_hash_value(self, hash_name, files):
+        """
+        Update hash value if file metadata has changed.
+
+        :param hash_name:
+        :param files:
+        """
+        with self.redis_connection.pipeline(files) as pipe:
+            for file in files:
+                for key, value in file.items():
+                    value = json.dumps(value)
+                    redis_value = self.get_hash_value(hash_name, key)
+
+                    if value != redis_value:
+                        print('updated hash value successfully.')
+                        pipe.hset(hash_name, key, value)
+                    else:
+                        print('not exist update.')
+            pipe.execute()
+            pipe.bgsave()
+
+    def get_hash_value(self, hash_name, key):
+        """
+        Get hash value of key within the hash name.
+        :param hash_name: hash name
+        :param key: hash key
+        :return: hash value
+        """
+        return self.redis_connection.hget(str(hash_name), str(key))
